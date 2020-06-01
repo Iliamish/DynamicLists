@@ -11,8 +11,9 @@ import retrofit2.http.Query;
 public interface NetworkInterface {
 
     @GET("menu.php")
-    public Call<MainMenu> getFaculties(@Query(value = "fac") int fac, @Query(value = "spec") int spec,
-                                       @Query(value = "fin") int fin,@Query(value = "form") int form,
-                                       @Query(value = "json") boolean json);
+    public Call<MainMenu> getMenu(@Query(value = "list") int list, @Query(value = "level") int level,
+                                  @Query(value = "fac") String fac, @Query(value = "spec") String spec,
+                                       @Query(value = "fin") String fin,@Query(value = "form") String form,
+                                       @Query(value = "json") int json);
 
 }

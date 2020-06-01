@@ -64,7 +64,7 @@ public class NetworkService {
      *
      * @return the json api unn
      */
-    /*public ScheduleInterface getJSONApiUNN() {
-        return mRetrofitUNN.create(ScheduleInterface.class);
-    } */
+    public NetworkInterface getJSONApiUNN() {
+        return mRetrofitUNN.create(NetworkInterface.class);
+    }
 }

@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 public class MenuObject {
     @SerializedName("nrec")
     @Expose
-    private long nrec;
+    private String nrec;
 
     @SerializedName("value")
     @Expose
@@ -20,11 +20,11 @@ public class MenuObject {
     @Expose
     private boolean selected;
 
-    public long getNrec() {
+    public String getNrec() {
         return nrec;
     }
 
-    public void setNrec(int nrec) {
+    public void setNrec(String nrec) {
         this.nrec = nrec;
     }
 
