@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.pid.dynamiclists.Models.DynamicListObject;
 import com.pid.dynamiclists.Models.MainMenu;
 import com.pid.dynamiclists.Network.NetworkService;
 import com.pid.dynamiclists.R;
@@ -35,6 +36,23 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(@NonNull Call<MainMenu> call, @NonNull Throwable t) {
+                        System.out.println(call.request().url());
+                        System.out.println("Error occurred while getting request!");
+                    }
+                });
+
+        NetworkService.getInstance()
+                .getJSONApiUNN()
+                .getDynamicListByPath("28147497671098028147497671072102814749767198850")
+                .enqueue(new Callback<DynamicListObject>() {
+                    @Override
+                    public void onResponse(@NonNull Call<DynamicListObject> call, @NonNull Response<DynamicListObject> resp) {
+                        DynamicListObject menu = resp.body();
+
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<DynamicListObject> call, @NonNull Throwable t) {
                         System.out.println(call.request().url());
                         System.out.println("Error occurred while getting request!");
                     }
