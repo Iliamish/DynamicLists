@@ -31,6 +31,8 @@ dependencies {
 
     implementation 'com.github.ganfra:material-spinner:2.0.0'
 
+    implementation 'org.zakariya.stickyheaders:stickyheaders:0.7.10'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'

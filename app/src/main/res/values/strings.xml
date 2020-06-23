@@ -3,4 +3,14 @@
 
     <string name="search">Search</string>
     <string name="favorite">Favorite</string>
+
+    <string-array name="categories">
+        <item>Квота</item>
+        <item>Целевой федеральный</item>
+        <item>2</item>
+        <item>1</item>
+        <item>Целевой региональный</item>
+        <item>Без вступительных испытаний</item>
+        <item>Бюджет(общий конкурс)</item>
+    </string-array>
 </resources>

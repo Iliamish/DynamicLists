@@ -6,14 +6,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.pid.dynamiclists.Adapters.DynamicListAdapter;
 import com.pid.dynamiclists.Adapters.MenuSpinnerAdapter;
+import com.pid.dynamiclists.Adapters.StickyAdapter;
 import com.pid.dynamiclists.Configuration;
+import com.pid.dynamiclists.Models.DynamicListObject;
 import com.pid.dynamiclists.Models.MainMenu;
 import com.pid.dynamiclists.Models.MenuObject;
+import com.pid.dynamiclists.Models.Student;
 import com.pid.dynamiclists.Network.NetworkService;
 import com.pid.dynamiclists.R;
+
+import org.zakariya.stickyheaders.StickyHeaderLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +30,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import fr.ganfra.materialspinner.MaterialSpinner;
 import retrofit2.Call;
@@ -49,10 +57,16 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     MaterialSpinner spinnerForm;
     MaterialSpinner spinnerFin;
 
+    RecyclerView recyclerView;
+    DynamicListAdapter listAdapter;
+
+    List<Student> students;
+
     @Override
     public void onRefresh() {
-
+        getList();
     }
+
 
     @Nullable
     @Override
@@ -63,67 +77,66 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         specialities = new ArrayList<>();
         form = new ArrayList<>();
         fin = new ArrayList<>();
+        students = new ArrayList<>();
 
         CollapsingToolbarLayout collapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
-        Toolbar myToolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        Toolbar myToolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(myToolbar);
 
         pullToRefresh = view.findViewById(R.id.pullToRefresh);
+        pullToRefresh.setOnRefreshListener(this);
 
-        collapsingToolbarLayout.setTitleEnabled(false);
+        recyclerView = view.findViewById(R.id.dynamic_recyclerview);
+        listAdapter = new DynamicListAdapter(students);
+        recyclerView.setAdapter(listAdapter);
+
+        collapsingToolbarLayout.setTitleEnabled(true);
+        collapsingToolbarLayout.setTitle("Динамические списки");
         myToolbar.setTitle("");
+
+        final Button clearBtn = view.findViewById(R.id.clear_menu_btn);
+        clearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Configuration.chousenSpec = Configuration.emptySpec;
+                Configuration.chousenFac = Configuration.emptyFac;
+                Configuration.chousenFin = Configuration.emptyFin;
+                Configuration.chousenForm = Configuration.emptyForm;
+
+                spinnerFac.setSelection(0);
+                spinnerSpec.setSelection(0);
+                spinnerForm.setSelection(0);
+                spinnerFin.setSelection(0);
+
+                clearBtn.setVisibility(View.GONE);
+                getMenu(Configuration.emptyFac,Configuration.emptySpec, Configuration.emptyFin, Configuration.emptyForm);
+
+                students.clear();
+                listAdapter.notifyDataSetChanged();
+            }
+        });
 
         spinnerFac = collapsingToolbarLayout.findViewById(R.id.spinner);
 
         adapterFac = new MenuSpinnerAdapter(getActivity(),R.layout.simple_spinner_item,faculties);
 
-        NetworkService.getInstance()
-                .getJSONApiUNN()
-                .getMenu(1,1,"fac.value","spec.value", "fin.value", "form.value", 1)
-                .enqueue(new Callback<MainMenu>() {
-                    @Override
-                    public void onResponse(@NonNull Call<MainMenu> call, @NonNull Response<MainMenu> resp) {
-                        faculties.addAll(resp.body().getFacs());
-                        adapterFac.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<MainMenu> call, @NonNull Throwable t) {
-                        System.out.println(call.request().url());
-                        System.out.println("Error occurred while getting request!");
-                    }
-                });
-
         spinnerFac.setAdapter(adapterFac);
+
+        getMenu(Configuration.emptyFac,Configuration.emptySpec, Configuration.emptyFin, Configuration.emptyForm);
 
         spinnerFac.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if(position != -1) {
-                    spinnerSpec.setVisibility(View.VISIBLE);
                     pullToRefresh.setRefreshing(true);
-                    Configuration.chousenFac = faculties.get(position).getNrec();
-                    NetworkService.getInstance()
-                            .getJSONApiUNN()
-                            .getMenu(1,1,Configuration.chousenFac,"spec.value", "fin.value", "form.value", 1)
-                            .enqueue(new Callback<MainMenu>() {
-                                @Override
-                                public void onResponse(@NonNull Call<MainMenu> call, @NonNull Response<MainMenu> resp) {
-                                    specialities.clear();
-                                    specialities.addAll(resp.body().getSpecs());
-                                    adapterSpec.notifyDataSetChanged();
-                                    pullToRefresh.setRefreshing(false);
-                                }
 
-                                @Override
-                                public void onFailure(@NonNull Call<MainMenu> call, @NonNull Throwable t) {
-                                    if(pullToRefresh.isRefreshing()){
-                                        pullToRefresh.setRefreshing(false);
-                                    }
-                                    System.out.println(call.request().url());
-                                    System.out.println("Error occurred while getting request!");
-                                }
-                            });
+                    Configuration.chousenFac = faculties.get(position).getNrec();
+                    if(checkReadyForRequest()){
+                        getList();
+                    }else{
+                        getMenu(Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
+                        clearBtn.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -146,30 +159,14 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if(position != -1) {
-                    spinnerFin.setVisibility(View.VISIBLE);
                     pullToRefresh.setRefreshing(true);
                     Configuration.chousenSpec = specialities.get(position).getNrec();
-                    NetworkService.getInstance()
-                            .getJSONApiUNN()
-                            .getMenu(1,1,Configuration.chousenFac,Configuration.chousenSpec, "fin.value", "form.value", 1)
-                            .enqueue(new Callback<MainMenu>() {
-                                @Override
-                                public void onResponse(@NonNull Call<MainMenu> call, @NonNull Response<MainMenu> resp) {
-                                    fin.clear();
-                                    fin.addAll(resp.body().getForms());
-                                    adapterFin.notifyDataSetChanged();
-                                    pullToRefresh.setRefreshing(false);
-                                }
-
-                                @Override
-                                public void onFailure(@NonNull Call<MainMenu> call, @NonNull Throwable t) {
-                                    if(pullToRefresh.isRefreshing()){
-                                        pullToRefresh.setRefreshing(false);
-                                    }
-                                    System.out.println(call.request().url());
-                                    System.out.println("Error occurred while getting request!");
-                                }
-                            });
+                    if(checkReadyForRequest()){
+                        getList();
+                    }else{
+                        getMenu(Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
+                        clearBtn.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -196,27 +193,12 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     spinnerForm.setVisibility(View.VISIBLE);
                     pullToRefresh.setRefreshing(true);
                     Configuration.chousenFin = fin.get(position).getNrec();
-                    NetworkService.getInstance()
-                            .getJSONApiUNN()
-                            .getMenu(1,1,Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, "form.value", 1)
-                            .enqueue(new Callback<MainMenu>() {
-                                @Override
-                                public void onResponse(@NonNull Call<MainMenu> call, @NonNull Response<MainMenu> resp) {
-                                    form.clear();
-                                    form.addAll(resp.body().getFin());
-                                    adapterForm.notifyDataSetChanged();
-                                    pullToRefresh.setRefreshing(false);
-                                }
-
-                                @Override
-                                public void onFailure(@NonNull Call<MainMenu> call, @NonNull Throwable t) {
-                                    if(pullToRefresh.isRefreshing()){
-                                        pullToRefresh.setRefreshing(false);
-                                    }
-                                    System.out.println(call.request().url());
-                                    System.out.println("Error occurred while getting request!");
-                                }
-                            });
+                    if(checkReadyForRequest()){
+                        getList();
+                    }else{
+                        getMenu(Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
+                        clearBtn.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -239,10 +221,16 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if(position != -1) {
-                    spinnerForm.setVisibility(View.VISIBLE);
                    // pullToRefresh.setRefreshing(true);
                     Configuration.chousenForm = form.get(position).getNrec();
+                    pullToRefresh.setRefreshing(true);
 
+                    if(checkReadyForRequest()){
+                        getList();
+                    }else{
+                        getMenu(Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
+                        clearBtn.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -255,5 +243,97 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return view;
     }
 
+    private boolean checkReadyForRequest(){
+        return Configuration.chousenSpec != Configuration.emptySpec &&
+                Configuration.chousenFac != Configuration.emptyFac &&
+                Configuration.chousenFin != Configuration.emptyFin &&
+                Configuration.chousenForm != Configuration.emptyForm;
+    }
+
+    private boolean checkAllSpinnersClear(){
+        return Configuration.chousenSpec == Configuration.emptySpec &&
+                Configuration.chousenFac == Configuration.emptyFac &&
+                Configuration.chousenFin == Configuration.emptyFin &&
+                Configuration.chousenForm == Configuration.emptyForm;
+    }
+
+    private void getMenu(String fac_str,  String spec_str, String fin_str, String form_str){
+        NetworkService.getInstance()
+                .getJSONApiUNN()
+                .getMenu(1,1,fac_str,spec_str, fin_str, form_str, 1)
+                .enqueue(new Callback<MainMenu>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MainMenu> call, @NonNull Response<MainMenu> resp) {
+                        form.clear();
+                        form.addAll(resp.body().getForms());
+                        fin.clear();
+                        fin.addAll(resp.body().getFin());
+                        specialities.clear();
+                        specialities.addAll(resp.body().getSpecs());
+                        faculties.clear();
+                        faculties.addAll(resp.body().getFacs());
+
+                        adapterFac.notifyDataSetChanged();
+                        adapterSpec.notifyDataSetChanged();
+                        adapterForm.notifyDataSetChanged();
+                        adapterFin.notifyDataSetChanged();
+                        pullToRefresh.setRefreshing(false);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<MainMenu> call, @NonNull Throwable t) {
+                        if(pullToRefresh.isRefreshing()){
+                            pullToRefresh.setRefreshing(false);
+                        }
+                        System.out.println(call.request().url());
+                        System.out.println("Error occurred while getting request!");
+                    }
+                });
+    }
+
+    private void getList(){
+        NetworkService.getInstance()
+                .getJSONApiUNN()
+                .getDynamicListByPath(Configuration.chousenFac + (Configuration.chousenSpec.length() == 15 ?
+                (Configuration.chousenSpec + "0") : Configuration.chousenSpec) + Configuration.chousenFin+ Configuration.chousenForm)
+                .enqueue(new Callback<DynamicListObject>() {
+                    @Override
+                    public void onResponse(@NonNull Call<DynamicListObject> call, @NonNull Response<DynamicListObject> resp) {
+                        if(pullToRefresh.isRefreshing()){
+                            pullToRefresh.setRefreshing(false);
+                        }
+                        DynamicListObject menu = resp.body();
+                        if(menu !=  null ) {
+                            if(menu.getList().size() != 0) {
+                                students.clear();
+                                Student emst = new Student();
+                                emst.setCategnum(menu.getList().get(0).getCategnum());
+                                students.add(emst);
+                                for (int i = 0; i < menu.getList().size() - 1; i++) {
+                                    students.add(menu.getList().get(i));
+                                    if (!menu.getList().get(i).getCategnum().equals(menu.getList().get(i + 1).getCategnum())) {
+                                        Student emst2 = new Student();
+                                        emst2.setCategnum(menu.getList().get(i + 1).getCategnum());
+                                        students.add(emst2);
+                                        i++;
+                                    }
+                                }
+                                students.add(menu.getList().get(menu.getList().size() - 1));
+                                //students.addAll(menu.getList());
+                                listAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<DynamicListObject> call, @NonNull Throwable t) {
+                        if(pullToRefresh.isRefreshing()){
+                            pullToRefresh.setRefreshing(false);
+                        }
+                        System.out.println(call.request().url());
+                        System.out.println("Error occurred while getting request!");
+                    }
+                });
+    }
 
 }

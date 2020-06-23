@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
         app:expanded="true"
-        android:background="@android:color/holo_red_dark"
+        android:background="@android:color/white"
         >
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -25,6 +25,9 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:expandedTitleGravity="top|center"
             app:collapsedTitleGravity="center|start"
+            app:expandedTitleTextAppearance="@style/ExpandedAppBar"
+            app:collapsedTitleTextAppearance="@style/CollapsedAppBar"
+            android:elevation="4dp"
             >
 
             <include layout="@layout/dropdown_menu_layout"/>
@@ -35,7 +38,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/white"
                 app:titleMarginStart="0dp"
-                android:elevation="4dp"
+                android:elevation="8dp"
                 app:layout_collapseMode="pin" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -49,7 +52,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/schedule_recyclerview"
+            android:id="@+id/dynamic_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/accountMarginLeft"

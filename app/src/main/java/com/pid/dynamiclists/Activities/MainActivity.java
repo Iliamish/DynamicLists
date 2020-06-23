@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.navigation_type);
 
-        NetworkService.getInstance()
+        /*NetworkService.getInstance()
                 .getJSONApiUNN()
                 .getMenu(1,1,"fac.value","spec.value", "fin.value", "form.value", 1)
                 .enqueue(new Callback<MainMenu>() {
@@ -57,24 +57,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                         System.out.println(call.request().url());
                         System.out.println("Error occurred while getting request!");
                     }
-                });
+                });*/
 
-        NetworkService.getInstance()
-                .getJSONApiUNN()
-                .getDynamicListByPath("28147497671098028147497671072102814749767198850")
-                .enqueue(new Callback<DynamicListObject>() {
-                    @Override
-                    public void onResponse(@NonNull Call<DynamicListObject> call, @NonNull Response<DynamicListObject> resp) {
-                        DynamicListObject menu = resp.body();
 
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<DynamicListObject> call, @NonNull Throwable t) {
-                        System.out.println(call.request().url());
-                        System.out.println("Error occurred while getting request!");
-                    }
-                });
     }
 
     @Override
@@ -85,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 return true;
             case R.id.navigation_type:
                 // If user tab on menu schedule, while it visible, scroll view will move to top
-                ListFragment myFragment = (ListFragment) getSupportFragmentManager().findFragmentByTag("Schedule_tag");
+                ListFragment myFragment = (ListFragment) getSupportFragmentManager().findFragmentByTag("List_tag");
                 if (myFragment != null && myFragment.isVisible()) {
                     //((Schedule)getSupportFragmentManager().getFragments().get(0)).scheduleDaysView.smoothScrollToPosition(0);
                 }else {
