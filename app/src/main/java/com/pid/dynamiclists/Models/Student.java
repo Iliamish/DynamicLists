@@ -3,6 +3,9 @@ package com.pid.dynamiclists.Models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Student {
     @SerializedName("nrecabit")
     @Expose
@@ -79,6 +82,9 @@ public class Student {
     @SerializedName("mark6")
     @Expose
     private String mark6;
+
+    public boolean isFavourite = false;
+    public boolean isExpanded = false;
 
     public String getNrecabit() {
         return nrecabit;
@@ -182,6 +188,18 @@ public class Student {
 
     public void setSummark(String summark) {
         this.summark = summark;
+    }
+
+    public List<String> getMarksList(){
+        List<String> marks = new ArrayList<>();
+        marks.add(mark1);
+        marks.add(mark2);
+        marks.add(mark3);
+        marks.add(mark4);
+        marks.add(mark5);
+        marks.add(mark6);
+
+        return marks;
     }
 
     public String getMark1() {

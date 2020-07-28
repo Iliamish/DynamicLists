@@ -60,13 +60,15 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     RecyclerView recyclerView;
     DynamicListAdapter listAdapter;
 
-    List<Student> students;
+    DynamicListObject dynamicListObject;
+
+    Button clearBtn;
+    //List<Student> students;
 
     @Override
     public void onRefresh() {
         getList();
     }
-
 
     @Nullable
     @Override
@@ -77,7 +79,9 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         specialities = new ArrayList<>();
         form = new ArrayList<>();
         fin = new ArrayList<>();
-        students = new ArrayList<>();
+        //List<Student> students = ;
+        dynamicListObject = new DynamicListObject();
+        dynamicListObject.initLists();
 
         CollapsingToolbarLayout collapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
         Toolbar myToolbar = view.findViewById(R.id.toolbar);
@@ -87,14 +91,14 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         pullToRefresh.setOnRefreshListener(this);
 
         recyclerView = view.findViewById(R.id.dynamic_recyclerview);
-        listAdapter = new DynamicListAdapter(students);
+        listAdapter = new DynamicListAdapter(dynamicListObject);
         recyclerView.setAdapter(listAdapter);
 
         collapsingToolbarLayout.setTitleEnabled(true);
         collapsingToolbarLayout.setTitle("Динамические списки");
         myToolbar.setTitle("");
 
-        final Button clearBtn = view.findViewById(R.id.clear_menu_btn);
+        clearBtn = view.findViewById(R.id.clear_menu_btn);
         clearBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,18 +115,18 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 clearBtn.setVisibility(View.GONE);
                 getMenu(Configuration.emptyFac,Configuration.emptySpec, Configuration.emptyFin, Configuration.emptyForm);
 
-                students.clear();
+                dynamicListObject.getList().clear();
                 listAdapter.notifyDataSetChanged();
             }
         });
 
         spinnerFac = collapsingToolbarLayout.findViewById(R.id.spinner);
 
-        adapterFac = new MenuSpinnerAdapter(getActivity(),R.layout.simple_spinner_item,faculties);
+        adapterFac = new MenuSpinnerAdapter(getActivity(),R.layout.simple_spinner_item, faculties);
 
         spinnerFac.setAdapter(adapterFac);
 
-        getMenu(Configuration.emptyFac,Configuration.emptySpec, Configuration.emptyFin, Configuration.emptyForm);
+        getMenu(Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
 
         spinnerFac.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -190,7 +194,6 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if(position != -1) {
-                    spinnerForm.setVisibility(View.VISIBLE);
                     pullToRefresh.setRefreshing(true);
                     Configuration.chousenFin = fin.get(position).getNrec();
                     if(checkReadyForRequest()){
@@ -243,6 +246,13 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return view;
     }
 
+    private boolean checkAllSpinnerEmpty(){
+        return spinnerSpec.getSelectedItem() == null &&
+                spinnerFin.getSelectedItem() == null &&
+                spinnerFac.getSelectedItem() == null &&
+                spinnerForm.getSelectedItem() == null;
+    }
+
     private boolean checkReadyForRequest(){
         return Configuration.chousenSpec != Configuration.emptySpec &&
                 Configuration.chousenFac != Configuration.emptyFac &&
@@ -255,6 +265,15 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 Configuration.chousenFac == Configuration.emptyFac &&
                 Configuration.chousenFin == Configuration.emptyFin &&
                 Configuration.chousenForm == Configuration.emptyForm;
+    }
+
+    private int getIndexFromList(List<MenuObject> list, String obj){
+        for(int i = 0; i < list.size(); i++){
+            if(list.get(i).getNrec().equals(obj)){
+                return i;
+            }
+        }
+        return 0;
     }
 
     private void getMenu(String fac_str,  String spec_str, String fin_str, String form_str){
@@ -277,6 +296,18 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         adapterSpec.notifyDataSetChanged();
                         adapterForm.notifyDataSetChanged();
                         adapterFin.notifyDataSetChanged();
+
+                        if(checkReadyForRequest()){
+                            if(checkAllSpinnerEmpty()) {
+                                spinnerSpec.setSelection(getIndexFromList(specialities, Configuration.chousenSpec) + 1);
+                                spinnerForm.setSelection(getIndexFromList(form, Configuration.chousenForm) + 1);
+                                spinnerFac.setSelection(getIndexFromList(faculties, Configuration.chousenFac) + 1);
+                                spinnerFin.setSelection(getIndexFromList(fin, Configuration.chousenFin) + 1);
+                                clearBtn.setVisibility(View.VISIBLE);
+                                getList();
+                            }
+                        }
+
                         pullToRefresh.setRefreshing(false);
                     }
 
@@ -302,23 +333,29 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         if(pullToRefresh.isRefreshing()){
                             pullToRefresh.setRefreshing(false);
                         }
-                        DynamicListObject menu = resp.body();
-                        if(menu !=  null ) {
-                            if(menu.getList().size() != 0) {
-                                students.clear();
+
+                        if(resp.body() !=  null ) {
+                            dynamicListObject.getList().clear();
+                            dynamicListObject.getPlaces().clear();
+                            dynamicListObject.getSubjects().clear();
+                            dynamicListObject.getList().addAll(resp.body().getList());
+                            dynamicListObject.getPlaces().addAll(resp.body().getPlaces());
+                            dynamicListObject.getSubjects().addAll(resp.body().getSubjects());
+
+                            if(dynamicListObject.getList().size() != 0) {
+                                List<Student> students = dynamicListObject.getList();
                                 Student emst = new Student();
-                                emst.setCategnum(menu.getList().get(0).getCategnum());
-                                students.add(emst);
-                                for (int i = 0; i < menu.getList().size() - 1; i++) {
-                                    students.add(menu.getList().get(i));
-                                    if (!menu.getList().get(i).getCategnum().equals(menu.getList().get(i + 1).getCategnum())) {
+                                emst.setCategnum(students.get(0).getCategnum());
+                                students.add(0,emst);
+                                for (int i = 1; i < students.size() - 1; i++) {
+                                    //students.add(menu.getList().get(i));
+                                    if (!students.get(i).getCategnum().equals(students.get(i + 1).getCategnum())) {
                                         Student emst2 = new Student();
-                                        emst2.setCategnum(menu.getList().get(i + 1).getCategnum());
-                                        students.add(emst2);
+                                        emst2.setCategnum(students.get(i + 1).getCategnum());
+                                        students.add(i+1,emst2);
                                         i++;
                                     }
                                 }
-                                students.add(menu.getList().get(menu.getList().size() - 1));
                                 //students.addAll(menu.getList());
                                 listAdapter.notifyDataSetChanged();
                             }

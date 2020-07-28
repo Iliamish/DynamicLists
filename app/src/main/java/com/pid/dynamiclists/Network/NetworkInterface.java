@@ -2,6 +2,8 @@ package com.pid.dynamiclists.Network;
 
 import com.pid.dynamiclists.Models.DynamicListObject;
 import com.pid.dynamiclists.Models.MainMenu;
+import com.pid.dynamiclists.Models.SearchObject;
+import com.pid.dynamiclists.Models.StudentInfoObject;
 
 import java.util.List;
 
@@ -21,4 +23,10 @@ public interface NetworkInterface {
 
     @GET("archive/now/{path}.ar")
     Call <DynamicListObject> getDynamicListByPath(@Path("path") String path);
+
+    @GET("quick_search.php")
+    Call <SearchObject> getSearchList( @Query(value = "query") String text, @Query(value = "json") int json);
+
+    @GET("abiturient.php")
+    Call <StudentInfoObject> getAbiturient(@Query(value = "id") String id);
 }

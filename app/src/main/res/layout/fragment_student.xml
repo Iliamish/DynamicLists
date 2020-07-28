@@ -1,20 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/dis_coord_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@android:color/white"
-    tools:context=".Fragments.ListFragment">
+    tools:context=".Fragments.StudentFragment">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar"
+        android:id="@+id/main.appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        app:expanded="true"
         android:background="@android:color/white"
         >
 
@@ -23,23 +22,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:expandedTitleGravity="top|center"
-            app:collapsedTitleGravity="center|start"
+            app:title="Text"
+            app:expandedTitleMarginStart="@dimen/scheduleMarginLeft"
+            app:expandedTitleMarginEnd="@dimen/scheduleMarginLeft"
+            app:expandedTitleMarginBottom="32dp"
             app:expandedTitleTextAppearance="@style/ExpandedAppBar"
+            app:expandedTitleGravity="top|start"
+            app:collapsedTitleGravity="center|start"
             app:collapsedTitleTextAppearance="@style/CollapsedAppBar"
-            android:elevation="4dp"
             >
-
-            <include layout="@layout/dropdown_menu_layout"/>
-
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/white"
                 app:titleMarginStart="0dp"
                 android:elevation="4dp"
                 app:layout_collapseMode="pin" />
+
+            <include layout="@layout/dropdown_student_info"/>
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -47,17 +49,16 @@
         android:id="@+id/pullToRefresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/dynamic_recyclerview"
+            android:id="@+id/student_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/accountMarginLeft"
             android:layout_marginRight="@dimen/accountMarginRight"
             app:layoutManager="LinearLayoutManager"
-            >
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         </androidx.recyclerview.widget.RecyclerView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
