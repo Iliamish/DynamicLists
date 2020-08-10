@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="accountMarginLeft">20dp</dimen>
+    <dimen name="accountMarginRight">20dp</dimen>
+    <dimen name="accountPaddingLeft">0dp</dimen>
+    <dimen name="accountPaddingIcon">16dp</dimen>
+
+    <dimen name="scheduleCardTVMarginLeft">20dp</dimen>
+    <dimen name="scheduleCardTVMarginRight">24dp</dimen>
+    <dimen name="scheduleCardTVMarginTop">16dp</dimen>
+    <dimen name="scheduleCardTVMarginBottom">16dp</dimen>
+
+    <dimen name="scheduleMarginLeft">20dp</dimen>
+</resources>
