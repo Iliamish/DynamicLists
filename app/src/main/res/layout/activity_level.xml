@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.LevelActivity">
+
+    <ImageView
+        android:id="@+id/imageView20"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/unn_logo_ru" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Добро Пожаловать!"
+        android:textColor="@android:color/black"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView20" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Выберите тип списка"
+        android:layout_marginTop="32dp"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView7" />
+
+    <ImageView
+        android:id="@+id/buchelor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="50dp"
+        android:elevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView8"
+        app:srcCompat="@drawable/rectangle" />
+
+    <ImageView
+        android:id="@+id/magistrature"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginRight="32dp"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView8"
+        app:srcCompat="@drawable/rectangle" />
+
+    <ImageView
+        android:id="@+id/spo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buchelor"
+        app:srcCompat="@drawable/rectangle" />
+
+    <TextView
+        android:id="@+id/buch_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Бакалавриат и специалитет"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:elevation="4dp"
+        android:layout_marginTop="45dp"
+        app:layout_constraintBottom_toBottomOf="@+id/buchelor"
+        app:layout_constraintEnd_toEndOf="@+id/buchelor"
+        app:layout_constraintStart_toStartOf="@+id/buchelor"
+        app:layout_constraintTop_toTopOf="@+id/buchelor" />
+
+    <TextView
+        android:id="@+id/mag_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Магистратура"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:elevation="4dp"
+        android:layout_marginTop="45dp"
+        app:layout_constraintBottom_toBottomOf="@+id/magistrature"
+        app:layout_constraintEnd_toEndOf="@+id/magistrature"
+        app:layout_constraintStart_toStartOf="@+id/magistrature"
+        app:layout_constraintTop_toTopOf="@+id/magistrature" />
+
+    <TextView
+        android:id="@+id/spo_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="СПО"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:elevation="4dp"
+        android:layout_marginTop="45dp"
+        app:layout_constraintBottom_toBottomOf="@+id/spo"
+        app:layout_constraintEnd_toEndOf="@+id/spo"
+        app:layout_constraintStart_toStartOf="@+id/spo"
+        app:layout_constraintTop_toTopOf="@+id/spo" />
+
+    <ImageView
+        android:id="@+id/imageView24"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="2"
+        android:scaleY="2"
+        android:layout_marginBottom="45dp"
+        android:tint="@color/colorPrimary"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/buchelor"
+        app:layout_constraintEnd_toEndOf="@+id/buchelor"
+        app:layout_constraintStart_toStartOf="@+id/buchelor"
+        app:layout_constraintTop_toTopOf="@+id/buchelor"
+        app:srcCompat="@drawable/ic_buchelor" />
+
+    <ImageView
+        android:id="@+id/imageView25"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="2"
+        android:scaleY="2"
+        android:layout_marginBottom="45dp"
+        android:tint="@color/colorPrimary"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/magistrature"
+        app:layout_constraintEnd_toEndOf="@+id/magistrature"
+        app:layout_constraintStart_toStartOf="@+id/magistrature"
+        app:layout_constraintTop_toTopOf="@+id/magistrature"
+        app:srcCompat="@drawable/ic_mag" />
+
+    <ImageView
+        android:id="@+id/imageView26"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="2"
+        android:scaleY="2"
+        android:layout_marginBottom="45dp"
+        android:tint="@color/colorPrimary"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/spo"
+        app:layout_constraintEnd_toEndOf="@+id/spo"
+        app:layout_constraintStart_toStartOf="@+id/spo"
+        app:layout_constraintTop_toTopOf="@+id/spo"
+        app:srcCompat="@drawable/ic_spo" />
+</androidx.constraintlayout.widget.ConstraintLayout>

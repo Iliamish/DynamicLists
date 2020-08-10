@@ -59,7 +59,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
             @Override
             public void onResponse(Call<StudentInfoObject> call, Response<StudentInfoObject> response){
                 System.out.println(response.body());
-                getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container2, new StudentFragment(response.body()), "StudentFragment_Tag").addToBackStack("Search").commit();
+                getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container2, new StudentFragment(response.body(),users.get(position).getNrecabit()), "StudentFragment_Tag").addToBackStack("Search").commit();
             }
 
             @Override
@@ -121,6 +121,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
                     for (ShortStudent user : list) {
                         adapter.add(user);
                     }
+                    adapter.notifyDataSetChanged();
                     hint.setVisibility(View.INVISIBLE);
                 }else{
                     hint.setVisibility(View.VISIBLE);

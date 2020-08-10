@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.pid.dynamiclists.Activities.MainActivity;
+import com.pid.dynamiclists.Configuration;
 import com.pid.dynamiclists.Models.StudentInfoSpecs;
 import com.pid.dynamiclists.R;
 
@@ -19,7 +21,7 @@ public class StudentInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private LayoutInflater inflater;
     private int layout;
 
-    String[] rome = new String[]{"I", "II", "III", "IV"};
+    String[] rome = new String[]{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII"};
     /**
      * The Context.
      */
@@ -84,6 +86,17 @@ public class StudentInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
          */
         ViewHolder(View view){
             super(view);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Configuration.chousenSpec = specs.get(getAdapterPosition()).getNrecspec();
+                    Configuration.chousenFac = specs.get(getAdapterPosition()).getNrecfac();
+                    Configuration.chousenForm = specs.get(getAdapterPosition()).getNrecform();
+                    Configuration.chousenFin = specs.get(getAdapterPosition()).getNrecfin();
+
+                    ((MainActivity)context).goToChousenFragment(R.id.navigation_type);
+                }
+            });
             facView = view.findViewById(R.id.fac);
             positionView = view.findViewById(R.id.spec_position);
             specView = view.findViewById(R.id.spec);

@@ -1,14 +1,21 @@
 package com.pid.dynamiclists.Fragments;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.pid.dynamiclists.Adapters.DynamicListAdapter;
 import com.pid.dynamiclists.Adapters.MenuSpinnerAdapter;
 import com.pid.dynamiclists.Adapters.StickyAdapter;
@@ -16,12 +23,15 @@ import com.pid.dynamiclists.Configuration;
 import com.pid.dynamiclists.Models.DynamicListObject;
 import com.pid.dynamiclists.Models.MainMenu;
 import com.pid.dynamiclists.Models.MenuObject;
+import com.pid.dynamiclists.Models.Place;
 import com.pid.dynamiclists.Models.Student;
 import com.pid.dynamiclists.Network.NetworkService;
 import com.pid.dynamiclists.R;
+import com.pid.dynamiclists.StorageIO.StorageIO;
 
 import org.zakariya.stickyheaders.StickyHeaderLayoutManager;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,23 +67,47 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     MaterialSpinner spinnerForm;
     MaterialSpinner spinnerFin;
 
-    RecyclerView recyclerView;
+    TextView lastMod;
+    TextView placesCount;
+    TextView peopleMass;
+
+    public RecyclerView recyclerView;
     DynamicListAdapter listAdapter;
 
     DynamicListObject dynamicListObject;
 
     Button clearBtn;
+
+    Context context;
     //List<Student> students;
 
     @Override
     public void onRefresh() {
-        getList();
+        if(!NetworkService.getInstance().haveInternetConnection()) {
+            System.out.println("\\\\ NO INTERNET CONNECTION \\\\");
+            showToast("Нет соединения с интернетом", Toast.LENGTH_SHORT);
+            pullToRefresh.setRefreshing(false);
+        }else{
+            getList();
+            if(checkAllSpinnerEmpty()){
+                getMenu(Configuration.emptyFac,Configuration.emptySpec, Configuration.emptyFin, Configuration.emptyForm);
+            }
+        }
+    }
+
+    public void showToast(String text, int duration){
+        if(isAdded()) {
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
+
+        context = getActivity();
 
         faculties = new ArrayList<>();
         specialities = new ArrayList<>();
@@ -91,12 +125,16 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         pullToRefresh.setOnRefreshListener(this);
 
         recyclerView = view.findViewById(R.id.dynamic_recyclerview);
-        listAdapter = new DynamicListAdapter(dynamicListObject);
+        listAdapter = new DynamicListAdapter(getActivity(),dynamicListObject);
         recyclerView.setAdapter(listAdapter);
 
         collapsingToolbarLayout.setTitleEnabled(true);
         collapsingToolbarLayout.setTitle("Динамические списки");
         myToolbar.setTitle("");
+
+        lastMod = view.findViewById(R.id.lastmod);
+        placesCount = view.findViewById(R.id.places_counter);
+        peopleMass = view.findViewById(R.id.size_div_places);
 
         clearBtn = view.findViewById(R.id.clear_menu_btn);
         clearBtn.setOnClickListener(new View.OnClickListener() {
@@ -113,6 +151,9 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 spinnerFin.setSelection(0);
 
                 clearBtn.setVisibility(View.GONE);
+                lastMod.setVisibility(View.GONE);
+                placesCount.setVisibility(View.GONE);
+                peopleMass.setVisibility(View.GONE);
                 getMenu(Configuration.emptyFac,Configuration.emptySpec, Configuration.emptyFin, Configuration.emptyForm);
 
                 dynamicListObject.getList().clear();
@@ -120,13 +161,18 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
         });
 
+        if(!NetworkService.getInstance().haveInternetConnection()) {
+            System.out.println("\\\\ NO INTERNET CONNECTION \\\\");
+            showToast("Нет соединения с интернетом", Toast.LENGTH_LONG);
+        }
+
+        getMenu(Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
+
         spinnerFac = collapsingToolbarLayout.findViewById(R.id.spinner);
 
         adapterFac = new MenuSpinnerAdapter(getActivity(),R.layout.simple_spinner_item, faculties);
 
         spinnerFac.setAdapter(adapterFac);
-
-        getMenu(Configuration.chousenFac,Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
 
         spinnerFac.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -279,7 +325,7 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private void getMenu(String fac_str,  String spec_str, String fin_str, String form_str){
         NetworkService.getInstance()
                 .getJSONApiUNN()
-                .getMenu(1,1,fac_str,spec_str, fin_str, form_str, 1)
+                .getMenu(1,Configuration.chousenLevel,fac_str,spec_str, fin_str, form_str, 1)
                 .enqueue(new Callback<MainMenu>() {
                     @Override
                     public void onResponse(@NonNull Call<MainMenu> call, @NonNull Response<MainMenu> resp) {
@@ -342,22 +388,65 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                             dynamicListObject.getPlaces().addAll(resp.body().getPlaces());
                             dynamicListObject.getSubjects().addAll(resp.body().getSubjects());
 
+                            String fileInput = StorageIO.readFile(context.getFilesDir(), "favoriteList");
+                            List<String> list;
+
+                            int count = 0;
+
+                            for(Place place : dynamicListObject.getPlaces()){
+                                count += Integer.parseInt(place.getValue());
+                            }
+
+                            if(fileInput.equals("")) {
+                                list = new ArrayList<>();
+                            }
+                            else{
+                                Type listType = new TypeToken<ArrayList<String>>() {
+                                }.getType();
+                                list = new Gson().fromJson(fileInput, listType);
+                            }
+
                             if(dynamicListObject.getList().size() != 0) {
                                 List<Student> students = dynamicListObject.getList();
                                 Student emst = new Student();
-                                emst.setCategnum(students.get(0).getCategnum());
+                                if(dynamicListObject.getPlaces().size() != 0) {
+                                    emst.setCategnum(students.get(0).getCategnum());
+                                }else{
+                                    emst.setCategnum("-1");
+                                }
                                 students.add(0,emst);
                                 for (int i = 1; i < students.size() - 1; i++) {
                                     //students.add(menu.getList().get(i));
-                                    if (!students.get(i).getCategnum().equals(students.get(i + 1).getCategnum())) {
+                                    if (!students.get(i).getCategnum().equals(students.get(i + 1).getCategnum()) &&
+                                            !(students.get(i).getCategnum().equals("50") && students.get(i + 1).getCategnum().equals("100"))) {
                                         Student emst2 = new Student();
                                         emst2.setCategnum(students.get(i + 1).getCategnum());
                                         students.add(i+1,emst2);
                                         i++;
                                     }
+
+                                    if(list.indexOf(students.get(i).getNrecabit()) != -1){
+                                        students.get(i).isFavourite = true;
+                                    }
                                 }
                                 //students.addAll(menu.getList());
                                 listAdapter.notifyDataSetChanged();
+
+//                                if(Configuration.currentScrollPosition != 0){
+//                                    recyclerView.smoothScrollToPosition(Configuration.currentScrollPosition);
+//                                }
+
+                                if(count != 0) {
+                                    placesCount.setText("Бюджетных мест: " + count);
+                                    placesCount.setVisibility(View.VISIBLE);
+
+                                    double mass = (double) (resp.body().getList().size() * 10 / count) / 10;
+
+                                    peopleMass.setText("Конкурс: " + mass + " человек/место");
+                                    peopleMass.setVisibility(View.VISIBLE);
+                                }
+                                lastMod.setText("Последнее обновление: " + resp.body().getLastUpdate());
+                                lastMod.setVisibility(View.VISIBLE);
                             }
                         }
                     }

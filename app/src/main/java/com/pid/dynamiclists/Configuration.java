@@ -10,6 +10,8 @@ public class Configuration {
 
     public static String chousenFin = "fin.value";
 
+    public static int chousenLevel = 1;
+
     public static final String emptyFac = "fac.value";
 
     public static final String emptySpec = "spec.value";
@@ -17,4 +19,7 @@ public class Configuration {
     public static final String emptyForm = "form.value";
 
     public static final String emptyFin = "fin.value";
+
+    public static int currentScrollPosition = 0;
+
 }

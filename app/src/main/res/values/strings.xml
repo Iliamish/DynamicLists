@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">DynamicLists</string>
 
-    <string name="search">Search</string>
-    <string name="favorite">Favorite</string>
+    <string name="search">Поиск</string>
+    <string name="favorite">Избранное</string>
 
     <string-array name="categories">
         <item>Квота (особые права).</item>
@@ -14,6 +14,7 @@
         <item>Квота на целевое (Татарстан).</item>
         <item>БВИ.</item>
         <item>Бюджет (общий конкурс).</item>
+        <item>Внебюджет.</item>
     </string-array>
 
     <string name="search_hint">Поиск</string>

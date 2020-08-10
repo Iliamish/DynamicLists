@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/navigation_type"
         android:icon="@drawable/ic_buchelor"
-        android:title="Buchelor"/>
+        android:title="Бакалавриат"/>
 
     <item android:id="@+id/navigation_search"
         android:icon="@drawable/ic_search"

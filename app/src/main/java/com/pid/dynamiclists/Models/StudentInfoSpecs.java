@@ -45,6 +45,23 @@ public class StudentInfoSpecs {
     @Expose
     private String kol;
 
+    @SerializedName("nrecspec")
+    @Expose
+    private String nrecspec;
+
+    @SerializedName("nrecfac")
+    @Expose
+    private String nrecfac;
+
+    @SerializedName("nrecform")
+    @Expose
+    private String nrecform;
+
+    @SerializedName("nrecfin")
+    @Expose
+    private String nrecfin;
+
+
     public String getFormname() {
         return formname;
     }
@@ -123,5 +140,37 @@ public class StudentInfoSpecs {
 
     public void setKol(String kol) {
         this.kol = kol;
+    }
+
+    public String getNrecspec() {
+        return nrecspec;
+    }
+
+    public void setNrecspec(String nrecspec) {
+        this.nrecspec = nrecspec;
+    }
+
+    public String getNrecfac() {
+        return nrecfac;
+    }
+
+    public void setNrecfac(String nrecfac) {
+        this.nrecfac = nrecfac;
+    }
+
+    public String getNrecform() {
+        return nrecform;
+    }
+
+    public void setNrecform(String nrecform) {
+        this.nrecform = nrecform;
+    }
+
+    public String getNrecfin() {
+        return nrecfin;
+    }
+
+    public void setNrecfin(String nrecfin) {
+        this.nrecfin = nrecfin;
     }
 }

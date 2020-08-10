@@ -19,6 +19,11 @@ public class DynamicListObject {
     @Expose
     private List<Subject> subjects;
 
+    @SerializedName("lastmod")
+    @Expose
+    private String lastUpdate;
+
+
     public List<Student> getList() {
         return list;
     }
@@ -47,5 +52,13 @@ public class DynamicListObject {
 
     public void setSubjects(List<Subject> subjects) {
         this.subjects = subjects;
+    }
+
+    public String getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(String lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 }

@@ -1,20 +1,33 @@
 package com.pid.dynamiclists.Adapters;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.chauthai.swipereveallayout.SwipeRevealLayout;
+import com.chauthai.swipereveallayout.ViewBinderHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.pid.dynamiclists.Activities.MainActivity;
+import com.pid.dynamiclists.Configuration;
+import com.pid.dynamiclists.Fragments.StudentFragment;
 import com.pid.dynamiclists.Models.DynamicListObject;
 import com.pid.dynamiclists.Models.Place;
 import com.pid.dynamiclists.Models.Student;
+import com.pid.dynamiclists.Models.StudentInfoObject;
 import com.pid.dynamiclists.Models.Subject;
+import com.pid.dynamiclists.Network.NetworkService;
 import com.pid.dynamiclists.R;
+import com.pid.dynamiclists.StorageIO.StorageIO;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +38,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -37,10 +53,15 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private List<Subject> subjects;
 
-    public DynamicListAdapter(DynamicListObject object) {
+    private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
+
+    Context context;
+
+    public DynamicListAdapter(Context context, DynamicListObject object) {
         this.students = object.getList();
         this.places = object.getPlaces();
         this.subjects = object.getSubjects();
+        this.context = context;
     }
 
     @NonNull
@@ -61,12 +82,45 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (view instanceof DynamicListAdapter.ViewHolder) {
             DynamicListAdapter.ViewHolder viewHolder  = (DynamicListAdapter.ViewHolder)view;
             Student student = students.get(position) ;
+
+            viewBinderHelper.setOpenOnlyOne(true);
+            viewBinderHelper.bind(viewHolder.swipelayout, String.valueOf(position));
+            viewBinderHelper.closeLayout(String.valueOf(position));
+
             viewHolder.nameView.setText(student.getFio().length() > 30 ? student.getFio().substring(0, 27) + "..." : student.getFio());
             viewHolder.numView.setText(student.getMesto());
-            viewHolder.pointsView.setText("Общий балл: " + student.getSummark());
-            viewHolder.blankView.setText("Согласие: " + (student.getSogl().equals("0") ? "нет" : "да"));
+            viewHolder.pointsView.setText((Configuration.chousenLevel != 3 ? "Общий балл: " : "Конкурсный балл: ") + (!student.getCategnum().equals("50") ? student.getSummark() : "БВИ"));
+            viewHolder.blankView.setText(Html.fromHtml("Согласие: " + (student.getSogl().equals("1") ? "<font color=\"#00ff00\">" : "<font color=\"#ff0000\">") + (student.getSogl().equals("1") ? "да" : "нет") + "</font>", Html.FROM_HTML_MODE_COMPACT));
             viewHolder.statusLabelView.setText("Статус: ");
             viewHolder.statusView.setText(student.getStatus());
+
+//            viewHolder.mainLayout.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//
+//                }
+//            });
+
+            viewHolder.moreBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    NetworkService.getInstance().getJSONApiUNN().getAbiturient(student.getNrecabit()).enqueue(new Callback<StudentInfoObject>() {
+                        @Override
+                        public void onResponse(Call<StudentInfoObject> call, Response<StudentInfoObject> response){
+                            System.out.println(response.body());
+                            Configuration.currentScrollPosition = position;
+                            ((MainActivity)context).getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container2, new StudentFragment(response.body(), student.getNrecabit()), "StudentFragment_Tag").addToBackStack("List_tag").commit();
+                        }
+
+                        @Override
+                        public void onFailure(Call<StudentInfoObject> call, Throwable t) {
+                            System.out.println(call.request().url());
+                            System.out.println("Error occurred while getting request!");
+                            t.printStackTrace();
+                        }
+                    });
+                }
+            });
 
             List<String> marks = student.getMarksList();
 
@@ -82,11 +136,24 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             for (int i = 0; i < subjects.size(); i++){
 
                 viewHolder.marksViews.get(i).setText((marks.get(i).equals("-1") ? "\u231b" : marks.get(i)));
+                if(student.getCategnum().equals("50")){
+                    viewHolder.marksViews.get(i).setVisibility(View.GONE);
+                    viewHolder.subjViews.get(i).setVisibility(View.GONE);
+                }else{
+                    viewHolder.marksViews.get(i).setVisibility(View.VISIBLE);
+                    viewHolder.subjViews.get(i).setVisibility(View.VISIBLE);
+                }
 
                 if(i < subjects.size() -1){
                     viewHolder.subjViews.get(i).setText(subjects.get(i).getName() + ":");
                 }else{
-                    viewHolder.subjViews.get(i).setText("Индивидуальные достижения: ");
+                    if(subjects.get(i).getName().substring(0, subjects.get(i).getName().length() - 5).equals("Балл за индивидуальные достижения")) {
+                        viewHolder.subjViews.get(i).setText("Индивидуальные достижения: ");
+                        viewHolder.subjViews.get(i).setVisibility(View.VISIBLE);
+                        viewHolder.marksViews.get(i).setVisibility(View.VISIBLE);
+                    }else{
+                        viewHolder.subjViews.get(i).setText(subjects.get(i).getName() + ":");
+                    }
                 }
             }
 
@@ -108,12 +175,14 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     pos = 6;
                     break;
                 case 50:
-                    pos = 7;
+                    pos = 8;
                     break;
                 case 100:
                     pos = 8;
                     break;
-
+                case -1:
+                    pos = 9;
+                    break;
                     default:
                         break;
             }
@@ -126,7 +195,7 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             }
 
-            if(places.size() != 0) {
+            if(places.size() != 0 && !student.getCategnum().equals("50")) {
                 viewHolder.nameView.setText(params[pos] + " Количество мест: " + places.get(pos2).getValue());
             }else{
                 viewHolder.nameView.setText(params[pos]);
@@ -155,10 +224,13 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         final TextView nameView, numView, pointsView, blankView, statusView, statusLabelView;
-        final ConstraintLayout bottomLayout;
+        final ConstraintLayout bottomLayout, mainLayout;
         final List<TextView> marksViews;
         final List<TextView> subjViews;
         final ToggleButton favourite;
+
+        final SwipeRevealLayout swipelayout;
+        final Button moreBtn;
 
         @Override
         public void onClick(View v) {
@@ -185,7 +257,14 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             super(view);
 
             view.setOnClickListener(this);
+
+            swipelayout = view.findViewById(R.id.swipelayout);
+
+            moreBtn = view.findViewById(R.id.more_info);
             bottomLayout = view.findViewById(R.id.linear_bottom);
+            mainLayout = view.findViewById(R.id.main_layout);
+
+            mainLayout.setOnClickListener(this);
             nameView = view.findViewById(R.id.fio);
             numView = view.findViewById(R.id.position);
             pointsView = view.findViewById(R.id.points);
@@ -198,6 +277,31 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     students.get(getAdapterPosition()).isFavourite = isChecked;
+
+                    String fileInput = StorageIO.readFile(context.getFilesDir(), "favoriteList");
+
+                    List<String> list;
+
+                    if(isChecked){
+                        if(fileInput.equals("")) {
+                            list = new ArrayList<>();
+                        }
+                        else{
+                            Type listType = new TypeToken<ArrayList<String>>() {
+                            }.getType();
+                            list = new Gson().fromJson(fileInput, listType);
+                        }
+                        if(list.indexOf(students.get(getAdapterPosition()).getNrecabit()) == -1) {
+                            list.add(students.get(getAdapterPosition()).getNrecabit());
+                        }
+                    }else{
+                        Type listType = new TypeToken<ArrayList<String>>() {
+                        }.getType();
+                        list = new Gson().fromJson(fileInput, listType);
+
+                        list.remove(students.get(getAdapterPosition()).getNrecabit());
+                    }
+                    StorageIO.writeFile(context.getFilesDir(), "favoriteList", new Gson().toJson(list));
                 }
             });
 
