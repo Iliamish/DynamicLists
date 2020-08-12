@@ -19,6 +19,10 @@ public class DynamicListObject {
     @Expose
     private List<Subject> subjects;
 
+    @SerializedName("waves")
+    @Expose
+    private List<Wave> waves;
+
     @SerializedName("lastmod")
     @Expose
     private String lastUpdate;
@@ -32,6 +36,15 @@ public class DynamicListObject {
         this.list = new ArrayList<>();
         this.places = new ArrayList<>();
         this.subjects = new ArrayList<>();
+        this.waves = new ArrayList<>();
+    }
+
+    public List<Wave> getWaves() {
+        return waves;
+    }
+
+    public void setWaves(List<Wave> waves) {
+        this.waves = waves;
     }
 
     public void setList(List<Student> list) {

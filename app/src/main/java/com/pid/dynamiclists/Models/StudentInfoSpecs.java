@@ -4,6 +4,10 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class StudentInfoSpecs {
+    @SerializedName("level")
+    @Expose
+    private int level;
+
     @SerializedName("formname")
     @Expose
     private String formname;
@@ -53,7 +57,7 @@ public class StudentInfoSpecs {
     @Expose
     private String nrecfac;
 
-    @SerializedName("nrecform")
+    @SerializedName("forma")
     @Expose
     private String nrecform;
 
@@ -61,6 +65,13 @@ public class StudentInfoSpecs {
     @Expose
     private String nrecfin;
 
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
 
     public String getFormname() {
         return formname;

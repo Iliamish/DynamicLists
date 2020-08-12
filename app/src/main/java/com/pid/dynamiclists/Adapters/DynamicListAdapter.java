@@ -1,6 +1,7 @@
 package com.pid.dynamiclists.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -94,12 +96,27 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             viewHolder.statusLabelView.setText("Статус: ");
             viewHolder.statusView.setText(student.getStatus());
 
+            switch (student.getStatus()){
+                case "зачислен":
+                    viewHolder.statusView.setTextColor(context.getResources().getColor(R.color.colorGreen, context.getTheme()));
+                    break;
+                case "к зачислению":
+                    viewHolder.statusView.setTextColor(context.getResources().getColor(R.color.colorOrange, context.getTheme()));
+                    break;
+                case "заявление принято":
+                    viewHolder.statusView.setTextColor(context.getResources().getColor(R.color.colorPrimary, context.getTheme()));
+                    break;
+                default:
+                    viewHolder.statusView.setTextColor(context.getResources().getColor(R.color.colorRed, context.getTheme()));
+                    break;
+            }
 //            viewHolder.mainLayout.setOnClickListener(new View.OnClickListener() {
 //                @Override
 //                public void onClick(View v) {
 //
 //                }
 //            });
+            viewHolder.mainLayout.setBackgroundColor(Color.parseColor(Configuration.waveColorArray[Integer.parseInt(student.getWave())]));
 
             viewHolder.moreBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -195,7 +212,7 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             }
 
-            if(places.size() != 0 && !student.getCategnum().equals("50")) {
+            if(places.size() != 0) {
                 viewHolder.nameView.setText(params[pos] + " Количество мест: " + places.get(pos2).getValue());
             }else{
                 viewHolder.nameView.setText(params[pos]);

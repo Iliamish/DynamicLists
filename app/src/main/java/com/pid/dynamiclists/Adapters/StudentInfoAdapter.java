@@ -57,7 +57,7 @@ public class StudentInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             viewHolder.facView.setText(Html.fromHtml("<b>Факультет: </b>"  + spec.getFac(), Html.FROM_HTML_MODE_COMPACT));
             viewHolder.formView.setText(Html.fromHtml("<b>Форма обучения: </b>"  + spec.getFormname(), Html.FROM_HTML_MODE_COMPACT));
             viewHolder.sumView.setText(Html.fromHtml("<b>Сумма баллов: </b>"  + spec.getSummark(), Html.FROM_HTML_MODE_COMPACT));
-            viewHolder.statusView.setText(Html.fromHtml("<b>Статус: </b><font color=\"#DF9D1C\">" + spec.getStatus()  + "</font>", Html.FROM_HTML_MODE_COMPACT));
+            viewHolder.statusView.setText(Html.fromHtml("<b>Статус: </b><font color=\""+ Configuration.statusColorArray[Configuration.getStatusColor(spec.getStatus())]+"\">" + spec.getStatus()  + "</font>", Html.FROM_HTML_MODE_COMPACT));
             viewHolder.soglView.setText(Html.fromHtml("<b>Согласие: </b>" + (spec.getOrig().equals("1") ? "<font color=\"#00ff00\">" : "<font color=\"#ff0000\">") + (spec.getOrig().equals("1") ? "да" : "нет") + "</font>", Html.FROM_HTML_MODE_COMPACT));
             viewHolder.planView.setText("Мест в плане\n" + spec.getKol());
             viewHolder.currentPlaceView.setText("Текущее\n" + spec.getMesto());
@@ -93,7 +93,9 @@ public class StudentInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     Configuration.chousenFac = specs.get(getAdapterPosition()).getNrecfac();
                     Configuration.chousenForm = specs.get(getAdapterPosition()).getNrecform();
                     Configuration.chousenFin = specs.get(getAdapterPosition()).getNrecfin();
+                    Configuration.chousenLevel = specs.get(getAdapterPosition()).getLevel();
 
+                    ((MainActivity)context).changeLevel();
                     ((MainActivity)context).goToChousenFragment(R.id.navigation_type);
                 }
             });

@@ -73,7 +73,7 @@ public class FavoriteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.fac)).setText(Html.fromHtml("<b>Факультет: </b>" + spec.getFac(), Html.FROM_HTML_MODE_COMPACT));
             ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.form)).setText(Html.fromHtml("<b>Форма обучения: </b>" + spec.getFormname(), Html.FROM_HTML_MODE_COMPACT));
             ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.sum)).setText(Html.fromHtml("<b>Сумма баллов: </b>" + spec.getSummark(), Html.FROM_HTML_MODE_COMPACT));
-            ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.status)).setText(Html.fromHtml("<b>Статус: </b><font color=\"#DF9D1C\">" + spec.getStatus() + "</font>", Html.FROM_HTML_MODE_COMPACT));
+            ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.status)).setText(Html.fromHtml("<b>Статус: </b><font color=\""+ Configuration.statusColorArray[Configuration.getStatusColor(spec.getStatus())]+"\">" + spec.getStatus() + "</font>", Html.FROM_HTML_MODE_COMPACT));
             ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.sogl)).setText(Html.fromHtml("<b>Согласие: </b>" + (spec.getOrig().equals("1") ? "<font color=\"#00ff00\">" : "<font color=\"#ff0000\">") + (spec.getOrig().equals("1") ? "да" : "нет") + "</font>", Html.FROM_HTML_MODE_COMPACT));
             ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.plan)).setText("Мест в плане\n" + spec.getKol());
             ((TextView)viewHolder.specsLayouts.get(i).findViewById(R.id.current_place)).setText("Текущее\n" + spec.getMesto());
@@ -184,7 +184,9 @@ public class FavoriteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         Configuration.chousenFac = favorites.get(getAdapterPosition()).getApps().get(finalI).getNrecfac();
                         Configuration.chousenForm = favorites.get(getAdapterPosition()).getApps().get(finalI).getNrecform();
                         Configuration.chousenFin = favorites.get(getAdapterPosition()).getApps().get(finalI).getNrecfin();
+                        Configuration.chousenLevel = favorites.get(getAdapterPosition()).getApps().get(finalI).getLevel();
 
+                        ((MainActivity)context).changeLevel();
                         ((MainActivity)context).goToChousenFragment(R.id.navigation_type);
                     }
                 });

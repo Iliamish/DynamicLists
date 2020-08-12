@@ -58,8 +58,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 Configuration.chousenFin = Configuration.emptyFin;
                 Configuration.chousenForm = Configuration.emptyForm;
 
-                List<String> list = new ArrayList<>();
-                StorageIO.writeFile(getFilesDir(), "favoriteList", new Gson().toJson(list));
+//                List<String> list = new ArrayList<>();
+////                StorageIO.writeFile(getFilesDir(), "favoriteList", new Gson().toJson(list));
 
                 Intent intent = new Intent();
                 intent.setClass(getApplicationContext(), LevelActivity.class);
@@ -70,6 +70,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
             }
         });
 
+        changeLevel();
+
+    }
+
+    public void changeLevel(){
         switch (Configuration.chousenLevel){
             case 1:
                 bottomNavigationView.getMenu().getItem(0).setIcon(R.drawable.ic_buchelor);
@@ -89,7 +94,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
                 break;
         }
-
     }
 
     @Override

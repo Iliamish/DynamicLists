@@ -83,6 +83,10 @@ public class Student {
     @Expose
     private String mark6;
 
+    @SerializedName("wave")
+    @Expose
+    private String wave;
+
     public boolean isFavourite = false;
     public boolean isExpanded = false;
 
@@ -248,5 +252,13 @@ public class Student {
 
     public void setMark6(String mark6) {
         this.mark6 = mark6;
+    }
+
+    public String getWave() {
+        return wave;
+    }
+
+    public void setWave(String wave) {
+        this.wave = wave;
     }
 }

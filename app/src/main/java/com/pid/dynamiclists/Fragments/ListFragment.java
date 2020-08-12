@@ -2,13 +2,10 @@ package com.pid.dynamiclists.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,7 +15,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.pid.dynamiclists.Adapters.DynamicListAdapter;
 import com.pid.dynamiclists.Adapters.MenuSpinnerAdapter;
-import com.pid.dynamiclists.Adapters.StickyAdapter;
 import com.pid.dynamiclists.Configuration;
 import com.pid.dynamiclists.Models.DynamicListObject;
 import com.pid.dynamiclists.Models.MainMenu;
@@ -28,8 +24,6 @@ import com.pid.dynamiclists.Models.Student;
 import com.pid.dynamiclists.Network.NetworkService;
 import com.pid.dynamiclists.R;
 import com.pid.dynamiclists.StorageIO.StorageIO;
-
-import org.zakariya.stickyheaders.StickyHeaderLayoutManager;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -299,11 +293,18 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 spinnerForm.getSelectedItem() == null;
     }
 
+    private boolean checkAtLeastOneSpinnerCanBeFilled(){
+        return form.size() == 1 ||
+                fin.size() == 1  ||
+                specialities.size() == 1 ||
+                faculties.size() == 1;
+    }
+
     private boolean checkReadyForRequest(){
-        return Configuration.chousenSpec != Configuration.emptySpec &&
-                Configuration.chousenFac != Configuration.emptyFac &&
-                Configuration.chousenFin != Configuration.emptyFin &&
-                Configuration.chousenForm != Configuration.emptyForm;
+        return !Configuration.chousenSpec.equals(Configuration.emptySpec) &&
+                !Configuration.chousenFac.equals(Configuration.emptyFac) &&
+                !Configuration.chousenFin.equals(Configuration.emptyFin) &&
+                !Configuration.chousenForm.equals(Configuration.emptyForm);
     }
 
     private boolean checkAllSpinnersClear(){
@@ -343,16 +344,67 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         adapterForm.notifyDataSetChanged();
                         adapterFin.notifyDataSetChanged();
 
-                        if(checkReadyForRequest()){
-                            if(checkAllSpinnerEmpty()) {
+                        if(checkAtLeastOneSpinnerCanBeFilled()) {
+                            if (checkReadyForRequest()) {
                                 spinnerSpec.setSelection(getIndexFromList(specialities, Configuration.chousenSpec) + 1);
                                 spinnerForm.setSelection(getIndexFromList(form, Configuration.chousenForm) + 1);
                                 spinnerFac.setSelection(getIndexFromList(faculties, Configuration.chousenFac) + 1);
                                 spinnerFin.setSelection(getIndexFromList(fin, Configuration.chousenFin) + 1);
                                 clearBtn.setVisibility(View.VISIBLE);
                                 getList();
+                            } else {
+                                boolean request = false;
+                                if (Configuration.chousenForm.equals(Configuration.emptyForm)) {
+                                    if (form.size() == 1) {
+                                        Configuration.chousenForm = form.get(0).getNrec();
+                                        spinnerForm.setSelection(1);
+                                        request = true;
+                                    }
+                                }
+                                if (Configuration.chousenFac.equals(Configuration.emptyFac)) {
+                                    if (faculties.size() == 1) {
+                                        Configuration.chousenFac = faculties.get(0).getNrec();
+                                        spinnerFac.setSelection(1);
+                                        request = true;
+                                    }
+                                }
+                                if (Configuration.chousenFin.equals(Configuration.emptyFin)) {
+                                    if (fin.size() == 1) {
+                                        Configuration.chousenFin = fin.get(0).getNrec();
+                                        spinnerFin.setSelection(1);
+                                        request = true;
+                                    }
+                                }
+                                if (Configuration.chousenSpec.equals(Configuration.emptySpec)) {
+                                    if (specialities.size() == 1) {
+                                        Configuration.chousenSpec = specialities.get(0).getNrec();
+                                        spinnerSpec.setSelection(1);
+                                        request = true;
+                                    }
+                                }
+
+                                adapterFac.notifyDataSetChanged();
+                                adapterSpec.notifyDataSetChanged();
+                                adapterForm.notifyDataSetChanged();
+                                adapterFin.notifyDataSetChanged();
+
+                                if (request) {
+                                    getMenu(Configuration.chousenFac, Configuration.chousenSpec, Configuration.chousenFin, Configuration.chousenForm);
+                                }
                             }
                         }
+//                        }else{
+//                            if(checkReadyForRequest()){
+//                                if(checkAllSpinnerEmpty()) {
+//                                    spinnerSpec.setSelection(getIndexFromList(specialities, Configuration.chousenSpec) + 1);
+//                                    spinnerForm.setSelection(getIndexFromList(form, Configuration.chousenForm) + 1);
+//                                    spinnerFac.setSelection(getIndexFromList(faculties, Configuration.chousenFac) + 1);
+//                                    spinnerFin.setSelection(getIndexFromList(fin, Configuration.chousenFin) + 1);
+//                                    clearBtn.setVisibility(View.VISIBLE);
+//                                    getList();
+//                                }
+//                            }
+//                        }
 
                         pullToRefresh.setRefreshing(false);
                     }
@@ -384,9 +436,12 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                             dynamicListObject.getList().clear();
                             dynamicListObject.getPlaces().clear();
                             dynamicListObject.getSubjects().clear();
+                            dynamicListObject.getWaves().clear();
                             dynamicListObject.getList().addAll(resp.body().getList());
                             dynamicListObject.getPlaces().addAll(resp.body().getPlaces());
                             dynamicListObject.getSubjects().addAll(resp.body().getSubjects());
+                            dynamicListObject.getWaves().addAll(resp.body().getWaves());
+
 
                             String fileInput = StorageIO.readFile(context.getFilesDir(), "favoriteList");
                             List<String> list;
@@ -424,11 +479,12 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                         students.add(i+1,emst2);
                                         i++;
                                     }
-
                                     if(list.indexOf(students.get(i).getNrecabit()) != -1){
                                         students.get(i).isFavourite = true;
                                     }
                                 }
+
+
                                 //students.addAll(menu.getList());
                                 listAdapter.notifyDataSetChanged();
 
