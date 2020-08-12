@@ -1,13 +1,16 @@
 package com.pid.dynamiclists.Fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.pid.dynamiclists.Activities.MainActivity;
 import com.pid.dynamiclists.Adapters.DynamicListAdapter;
 import com.pid.dynamiclists.Adapters.FavoriteAdapter;
 import com.pid.dynamiclists.Adapters.StudentInfoAdapter;
@@ -40,6 +43,9 @@ public class FavoriteFragment  extends Fragment implements SwipeRefreshLayout.On
     FavoriteAdapter listAdapter;
     List<StudentInfoObject> favorites;
 
+    Context context;
+
+
     @Override
     public void onRefresh() {
         pullToRefresh.setRefreshing(false);
@@ -49,7 +55,8 @@ public class FavoriteFragment  extends Fragment implements SwipeRefreshLayout.On
         NetworkService.getInstance().getJSONApiUNN().getAbiturient(nrec).enqueue(new Callback<StudentInfoObject>() {
             @Override
             public void onResponse(Call<StudentInfoObject> call, Response<StudentInfoObject> response){
-                System.out.println(response.body());
+                response.body().getDan().add(nrec);
+
                 favorites.add(response.body());
                 listAdapter.notifyItemInserted(favorites.size() - 1);
                 pullToRefresh.setRefreshing(false);
@@ -66,6 +73,13 @@ public class FavoriteFragment  extends Fragment implements SwipeRefreshLayout.On
 
     }
 
+    public void showToast(String text, int duration){
+        if(isAdded()) {
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -78,11 +92,18 @@ public class FavoriteFragment  extends Fragment implements SwipeRefreshLayout.On
         pullToRefresh = view.findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(this);
 
+        context = getActivity();
+
         favorites = new ArrayList<>();
         listAdapter = new FavoriteAdapter(getContext(), favorites);
 
         recyclerView = view.findViewById(R.id.favorite_recyclerview);
         recyclerView.setAdapter(listAdapter);
+
+        if(!NetworkService.getInstance().haveInternetConnection()) {
+            System.out.println("\\\\ NO INTERNET CONNECTION \\\\");
+            showToast("Нет соединения с интернетом", Toast.LENGTH_LONG);
+        }
 
         String fileInput = StorageIO.readFile(getActivity().getFilesDir(), "favoriteList");
         List<String> list;
@@ -99,13 +120,36 @@ public class FavoriteFragment  extends Fragment implements SwipeRefreshLayout.On
         if(list.size() != 0) {
             pullToRefresh.setRefreshing(true);
         }
-        for (int i = 0; i < list.size(); i++ ){
-            getFavouriteStudent(list.get(i));
+        if(list.size() != 1) {
+            for (int i = 0; i < list.size(); i++) {
+                getFavouriteStudent(list.get(i));
+            }
+        }else{
+            runInfoForOneFavourite(list.get(0));
         }
 
         collapsingToolbarLayout.setTitleEnabled(false);
         //collapsingToolbarLayout.setTitle("Мое избранное");
         myToolbar.setTitle("Мое избранное");
+
+
         return view;
+    }
+
+    void runInfoForOneFavourite(String nrecabit){
+        NetworkService.getInstance().getJSONApiUNN().getAbiturient(nrecabit).enqueue(new Callback<StudentInfoObject>() {
+            @Override
+            public void onResponse(Call<StudentInfoObject> call, Response<StudentInfoObject> response){
+                System.out.println(response.body());
+                getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container2, new StudentFragment(response.body(),nrecabit), "StudentFragment_Tag").addToBackStack("Favorite").commit();
+            }
+
+            @Override
+            public void onFailure(Call<StudentInfoObject> call, Throwable t) {
+                System.out.println(call.request().url());
+                System.out.println("Error occurred while getting request!");
+                t.printStackTrace();
+            }
+        });
     }
 }

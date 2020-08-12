@@ -18,18 +18,18 @@
         android:text="TextView"
         android:textColor="@color/colorPrimary"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/arrow_exp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/arrow_exp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/name_fav"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/name_fav"
-        app:srcCompat="@drawable/ic_expand" />
+<!--    <ImageView-->
+<!--        android:id="@+id/arrow_exp"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginRight="16dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/name_fav"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/name_fav"-->
+<!--        app:srcCompat="@drawable/ic_expand" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

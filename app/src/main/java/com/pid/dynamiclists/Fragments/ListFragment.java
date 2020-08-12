@@ -1,6 +1,7 @@
 package com.pid.dynamiclists.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,8 @@ import android.widget.Toast;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.pid.dynamiclists.Activities.LevelActivity;
+import com.pid.dynamiclists.Activities.MainActivity;
 import com.pid.dynamiclists.Adapters.DynamicListAdapter;
 import com.pid.dynamiclists.Adapters.MenuSpinnerAdapter;
 import com.pid.dynamiclists.Configuration;
@@ -34,6 +37,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import fr.ganfra.materialspinner.MaterialSpinner;
@@ -115,6 +119,19 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         Toolbar myToolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(myToolbar);
 
+        myToolbar.setNavigationIcon(R.drawable.ic_arrow_back);
+        myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(context.getApplicationContext(), LevelActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                //getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container2, getActivity().getSupportFragmentManager().findFragmentByTag("Search_tag")).addToBackStack(null).commit();
+            }
+        });
+
+
         pullToRefresh = view.findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(this);
 
@@ -122,9 +139,9 @@ public class ListFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         listAdapter = new DynamicListAdapter(getActivity(),dynamicListObject);
         recyclerView.setAdapter(listAdapter);
 
-        collapsingToolbarLayout.setTitleEnabled(true);
         collapsingToolbarLayout.setTitle("Динамические списки");
         myToolbar.setTitle("");
+        myToolbar.setTitleMarginStart(-80);
 
         lastMod = view.findViewById(R.id.lastmod);
         placesCount = view.findViewById(R.id.places_counter);

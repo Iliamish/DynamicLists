@@ -28,6 +28,7 @@
             app:expandedTitleTextAppearance="@style/ExpandedAppBar"
             app:collapsedTitleTextAppearance="@style/CollapsedAppBar"
             android:elevation="4dp"
+            app:title="text"
             >
 
             <include layout="@layout/dropdown_menu_layout"/>
@@ -35,6 +36,7 @@
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
+                app:title="Text"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/white"
                 app:titleMarginStart="0dp"

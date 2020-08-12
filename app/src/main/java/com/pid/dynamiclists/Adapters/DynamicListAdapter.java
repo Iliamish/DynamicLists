@@ -139,6 +139,27 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
 
+            viewHolder.moreBtn2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    NetworkService.getInstance().getJSONApiUNN().getAbiturient(student.getNrecabit()).enqueue(new Callback<StudentInfoObject>() {
+                        @Override
+                        public void onResponse(Call<StudentInfoObject> call, Response<StudentInfoObject> response){
+                            System.out.println(response.body());
+                            Configuration.currentScrollPosition = position;
+                            ((MainActivity)context).getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.fade_in, R.anim.fade_out).replace(R.id.container2, new StudentFragment(response.body(), student.getNrecabit()), "StudentFragment_Tag").addToBackStack("List_tag").commit();
+                        }
+
+                        @Override
+                        public void onFailure(Call<StudentInfoObject> call, Throwable t) {
+                            System.out.println(call.request().url());
+                            System.out.println("Error occurred while getting request!");
+                            t.printStackTrace();
+                        }
+                    });
+                }
+            });
+
             List<String> marks = student.getMarksList();
 
             if(student.isExpanded) {
@@ -247,7 +268,7 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         final ToggleButton favourite;
 
         final SwipeRevealLayout swipelayout;
-        final Button moreBtn;
+        final Button moreBtn, moreBtn2;
 
         @Override
         public void onClick(View v) {
@@ -278,6 +299,7 @@ public class DynamicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             swipelayout = view.findViewById(R.id.swipelayout);
 
             moreBtn = view.findViewById(R.id.more_info);
+            moreBtn2 = view.findViewById(R.id.more_info_btn);
             bottomLayout = view.findViewById(R.id.linear_bottom);
             mainLayout = view.findViewById(R.id.main_layout);
 
